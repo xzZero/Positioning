@@ -22,6 +22,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.alternativevision.gpx.GPXParser;
 import org.alternativevision.gpx.beans.GPX;
+import org.alternativevision.gpx.beans.Track;
 import org.alternativevision.gpx.beans.Waypoint;
 
 import java.io.FileOutputStream;
@@ -54,8 +55,8 @@ public class LocationService extends Service {
             EXTRA_AVG_SPEED = "extra_avg_speed";
 
     private static final int
-            MIN_TIME = 100,
-            MIN_DISTANCE = 1;
+            MIN_TIME = 2000,
+            MIN_DISTANCE = 5;
 
     @Nullable
     @Override
@@ -85,7 +86,8 @@ public class LocationService extends Service {
         travelTime = 0;
         travelDistance = 0;
         sendBroadcastMessage(lastLocation, 0, 0);
-        final HashSet<Waypoint> waypointHashSet = new HashSet<>();
+        final ArrayList<Waypoint> waypointHashSet = new ArrayList<>();
+        final HashSet<Track> tracks = new HashSet<>();
         waypoint = new Waypoint();
         gpx = new GPX();
         gpxParser = new GPXParser();
@@ -94,6 +96,9 @@ public class LocationService extends Service {
         waypoint.setTime(date1);
 
         waypointHashSet.add(waypoint);
+        final Track track = new Track();
+        track.setTrackPoints(waypointHashSet);
+        tracks.add(track);
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -103,12 +108,16 @@ public class LocationService extends Service {
                 sendBroadcastMessage(location, travelDistance, avgSpeed(travelDistance, travelTime));
 
 
+
+                waypoint = new Waypoint();
                 waypoint.setLatitude(location.getLatitude());
                 waypoint.setLongitude(location.getLongitude());
                 waypoint.setTime(date2);
                 waypointHashSet.add(waypoint);
-
-                gpx.setWaypoints(waypointHashSet);
+                track.setTrackPoints(waypointHashSet);
+                tracks.clear();
+                tracks.add(track);
+                gpx.setTracks(tracks);
                 try {
                     out = new FileOutputStream("/sdcard/Download/map.gpx");
                     gpxParser.writeGPX(gpx, out);

@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.new_layout);
 
         laTxt = findViewById(R.id.laTxt);
         loTxt = findViewById(R.id.loTxt);
@@ -57,16 +57,16 @@ public class MainActivity extends AppCompatActivity {
         }
         broadcastListener = new BroadcastListener();
         this.registerReceiver(
-               broadcastListener, new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST)
+                broadcastListener, new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST)
         );
 
         uptBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                laTxt.setText(BroadcastListener.LA);
-                loTxt.setText(BroadcastListener.LO);
-                disTxt.setText(BroadcastListener.DI);
-                spTxt.setText(BroadcastListener.SP);
+                laTxt.setText("Latitude: " + BroadcastListener.LA);
+                loTxt.setText("Longitude: " + BroadcastListener.LO);
+                disTxt.setText("Distance: " + BroadcastListener.DI + "km");
+                spTxt.setText("Speed: " + BroadcastListener.SP + "km/h");
             }
         });
 
