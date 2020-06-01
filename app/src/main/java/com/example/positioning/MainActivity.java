@@ -9,13 +9,17 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -41,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_layout);
 
+
+
         laTxt = findViewById(R.id.laTxt);
         loTxt = findViewById(R.id.loTxt);
         disTxt = findViewById(R.id.disTxt);
@@ -54,6 +60,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (shouldAskPermissions()) {
             askPermissions();
+        }
+
+        if (shouldAskGPSEnabled()){
+            askGPSEnabled();
         }
         broadcastListener = new BroadcastListener();
         this.registerReceiver(
@@ -137,6 +147,34 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    protected boolean shouldAskGPSEnabled(){
+        LocationManager lm = (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch(Exception ex) {}
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch(Exception ex) {}
+
+        return !gps_enabled && !network_enabled;
+    }
+
+    protected void askGPSEnabled(){
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.gps_network_not_enabled)
+                .setPositiveButton(R.string.open_location_settings, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                })
+                .setNegativeButton(R.string.Cancel,null).show();
     }
 
 }
